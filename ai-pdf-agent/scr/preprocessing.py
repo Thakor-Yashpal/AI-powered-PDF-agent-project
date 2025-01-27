@@ -45,3 +45,5 @@ if extracted_text:
     cleaned_text = clean_text(extracted_text)
     if cleaned_text:
         print(cleaned_text)
+        
+        
