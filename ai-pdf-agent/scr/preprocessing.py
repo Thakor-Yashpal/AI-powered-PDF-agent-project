@@ -37,13 +37,4 @@ def clean_text(text):
     return cleaned_text
 
 
-# Example usage:
-pdf_path = "E:\AI-powered-PDF-agent-project\ai-pdf-agent"  # Replace with your PDF file path
-extracted_text = extract_text(pdf_path)
-
-if extracted_text:
-    cleaned_text = clean_text(extracted_text)
-    if cleaned_text:
-        print(cleaned_text)
-        
         
