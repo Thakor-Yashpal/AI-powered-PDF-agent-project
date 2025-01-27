@@ -38,7 +38,7 @@ def clean_text(text):
 
 
 # Example usage:
-pdf_path = "your_pdf_file.pdf"  # Replace with your PDF file path
+pdf_path = "E:\AI-powered-PDF-agent-project\ai-pdf-agent"  # Replace with your PDF file path
 extracted_text = extract_text(pdf_path)
 
 if extracted_text:
