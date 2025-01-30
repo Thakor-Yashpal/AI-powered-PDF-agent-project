@@ -38,4 +38,3 @@ def clean_text(text):
 
 
 
-# i wii cod from tommrow
