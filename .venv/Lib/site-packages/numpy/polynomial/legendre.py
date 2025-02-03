@@ -81,7 +81,7 @@ numpy.polynomial
 """
 import numpy as np
 import numpy.linalg as la
-from numpy.lib.array_utils import normalize_axis_index
+from numpy.core.multiarray import normalize_axis_index
 
 from . import polyutils as pu
 from ._polybase import ABCPolyBase
@@ -128,11 +128,10 @@ def poly2leg(pol):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from numpy import polynomial as P
     >>> p = P.Polynomial(np.arange(4))
     >>> p
-    Polynomial([0.,  1.,  2.,  3.], domain=[-1.,  1.], window=[-1.,  1.], ...
+    Polynomial([0.,  1.,  2.,  3.], domain=[-1,  1], window=[-1,  1])
     >>> c = P.Legendre(P.legendre.poly2leg(p.coef))
     >>> c
     Legendre([ 1.  ,  3.25,  1.  ,  0.75], domain=[-1,  1], window=[-1,  1]) # may vary
@@ -182,10 +181,10 @@ def leg2poly(c):
     >>> from numpy import polynomial as P
     >>> c = P.Legendre(range(4))
     >>> c
-    Legendre([0., 1., 2., 3.], domain=[-1.,  1.], window=[-1.,  1.], symbol='x')
+    Legendre([0., 1., 2., 3.], domain=[-1,  1], window=[-1,  1])
     >>> p = c.convert(kind=P.Polynomial)
     >>> p
-    Polynomial([-1. , -3.5,  3. ,  7.5], domain=[-1.,  1.], window=[-1., ...
+    Polynomial([-1. , -3.5,  3. ,  7.5], domain=[-1.,  1.], window=[-1.,  1.])
     >>> P.legendre.leg2poly(range(4))
     array([-1. , -3.5,  3. ,  7.5])
 
@@ -207,14 +206,13 @@ def leg2poly(c):
             c1 = polyadd(tmp, (polymulx(c1)*(2*i - 1))/i)
         return polyadd(c0, polymulx(c1))
 
-
 #
 # These are constant arrays are of integer type so as to be compatible
 # with the widest range of other types, such as Decimal.
 #
 
 # Legendre
-legdomain = np.array([-1., 1.])
+legdomain = np.array([-1, 1])
 
 # Legendre coefficients representing zero.
 legzero = np.array([0])
@@ -274,7 +272,7 @@ def legfromroots(roots):
 
     .. math:: p(x) = (x - r_0) * (x - r_1) * ... * (x - r_n),
 
-    in Legendre form, where the :math:`r_n` are the roots specified in `roots`.
+    in Legendre form, where the `r_n` are the roots specified in `roots`.
     If a zero has multiplicity n, then it must appear in `roots` n times.
     For instance, if 2 is a root of multiplicity three and 3 is a root of
     multiplicity 2, then `roots` looks something like [2, 2, 2, 3, 3]. The
@@ -427,7 +425,7 @@ def legmulx(c):
 
     See Also
     --------
-    legadd, legsub, legmul, legdiv, legpow
+    legadd, legmul, legdiv, legpow
 
     Notes
     -----
@@ -639,6 +637,8 @@ def legder(c, m=1, scl=1, axis=0):
     axis : int, optional
         Axis over which the derivative is taken. (Default: 0).
 
+        .. versionadded:: 1.7.0
+
     Returns
     -------
     der : ndarray
@@ -672,8 +672,8 @@ def legder(c, m=1, scl=1, axis=0):
     c = np.array(c, ndmin=1, copy=True)
     if c.dtype.char in '?bBhHiIlLqQpP':
         c = c.astype(np.double)
-    cnt = pu._as_int(m, "the order of derivation")
-    iaxis = pu._as_int(axis, "the axis")
+    cnt = pu._deprecate_as_int(m, "the order of derivation")
+    iaxis = pu._deprecate_as_int(axis, "the axis")
     if cnt < 0:
         raise ValueError("The order of derivation must be non-negative")
     iaxis = normalize_axis_index(iaxis, c.ndim)
@@ -739,6 +739,8 @@ def legint(c, m=1, k=[], lbnd=0, scl=1, axis=0):
     axis : int, optional
         Axis over which the integral is taken. (Default: 0).
 
+        .. versionadded:: 1.7.0
+
     Returns
     -------
     S : ndarray
@@ -789,8 +791,8 @@ def legint(c, m=1, k=[], lbnd=0, scl=1, axis=0):
         c = c.astype(np.double)
     if not np.iterable(k):
         k = [k]
-    cnt = pu._as_int(m, "the order of integration")
-    iaxis = pu._as_int(axis, "the axis")
+    cnt = pu._deprecate_as_int(m, "the order of integration")
+    iaxis = pu._deprecate_as_int(axis, "the axis")
     if cnt < 0:
         raise ValueError("The order of integration must be non-negative")
     if len(k) > cnt:
@@ -831,7 +833,7 @@ def legval(x, c, tensor=True):
     """
     Evaluate a Legendre series at points x.
 
-    If `c` is of length ``n + 1``, this function returns the value:
+    If `c` is of length `n + 1`, this function returns the value:
 
     .. math:: p(x) = c_0 * L_0(x) + c_1 * L_1(x) + ... + c_n * L_n(x)
 
@@ -840,7 +842,7 @@ def legval(x, c, tensor=True):
     or its elements must support multiplication and addition both with
     themselves and with the elements of `c`.
 
-    If `c` is a 1-D array, then ``p(x)`` will have the same shape as `x`.  If
+    If `c` is a 1-D array, then `p(x)` will have the same shape as `x`.  If
     `c` is multidimensional, then the shape of the result depends on the
     value of `tensor`. If `tensor` is true the shape will be c.shape[1:] +
     x.shape. If `tensor` is false the shape will be c.shape[1:]. Note that
@@ -870,6 +872,8 @@ def legval(x, c, tensor=True):
         over the columns of `c` for the evaluation.  This keyword is useful
         when `c` is multidimensional. The default value is True.
 
+        .. versionadded:: 1.7.0
+
     Returns
     -------
     values : ndarray, algebra_like
@@ -884,7 +888,7 @@ def legval(x, c, tensor=True):
     The evaluation uses Clenshaw recursion, aka synthetic division.
 
     """
-    c = np.array(c, ndmin=1, copy=None)
+    c = np.array(c, ndmin=1, copy=False)
     if c.dtype.char in '?bBhHiIlLqQpP':
         c = c.astype(np.double)
     if isinstance(x, (tuple, list)):
@@ -930,7 +934,7 @@ def legval2d(x, y, c):
     Parameters
     ----------
     x, y : array_like, compatible objects
-        The two dimensional series is evaluated at the points ``(x, y)``,
+        The two dimensional series is evaluated at the points `(x, y)`,
         where `x` and `y` must have the same shape. If `x` or `y` is a list
         or tuple, it is first converted to an ndarray, otherwise it is left
         unchanged and if it isn't an ndarray it is treated as a scalar.
@@ -949,6 +953,12 @@ def legval2d(x, y, c):
     See Also
     --------
     legval, leggrid2d, legval3d, leggrid3d
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     return pu._valnd(legval, c, x, y)
 
@@ -961,7 +971,7 @@ def leggrid2d(x, y, c):
 
     .. math:: p(a,b) = \\sum_{i,j} c_{i,j} * L_i(a) * L_j(b)
 
-    where the points ``(a, b)`` consist of all pairs formed by taking
+    where the points `(a, b)` consist of all pairs formed by taking
     `a` from `x` and `b` from `y`. The resulting points form a grid with
     `x` in the first dimension and `y` in the second.
 
@@ -983,7 +993,7 @@ def leggrid2d(x, y, c):
         unchanged and, if it isn't an ndarray, it is treated as a scalar.
     c : array_like
         Array of coefficients ordered so that the coefficient of the term of
-        multi-degree i,j is contained in ``c[i,j]``. If `c` has dimension
+        multi-degree i,j is contained in `c[i,j]`. If `c` has dimension
         greater than two the remaining indices enumerate multiple sets of
         coefficients.
 
@@ -996,6 +1006,12 @@ def leggrid2d(x, y, c):
     See Also
     --------
     legval, legval2d, legval3d, leggrid3d
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     return pu._gridnd(legval, c, x, y)
 
@@ -1022,7 +1038,7 @@ def legval3d(x, y, z, c):
     ----------
     x, y, z : array_like, compatible object
         The three dimensional series is evaluated at the points
-        ``(x, y, z)``, where `x`, `y`, and `z` must have the same shape.  If
+        `(x, y, z)`, where `x`, `y`, and `z` must have the same shape.  If
         any of `x`, `y`, or `z` is a list or tuple, it is first converted
         to an ndarray, otherwise it is left unchanged and if it isn't an
         ndarray it is  treated as a scalar.
@@ -1041,6 +1057,12 @@ def legval3d(x, y, z, c):
     See Also
     --------
     legval, legval2d, leggrid2d, leggrid3d
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     return pu._valnd(legval, c, x, y, z)
 
@@ -1053,7 +1075,7 @@ def leggrid3d(x, y, z, c):
 
     .. math:: p(a,b,c) = \\sum_{i,j,k} c_{i,j,k} * L_i(a) * L_j(b) * L_k(c)
 
-    where the points ``(a, b, c)`` consist of all triples formed by taking
+    where the points `(a, b, c)` consist of all triples formed by taking
     `a` from `x`, `b` from `y`, and `c` from `z`. The resulting points form
     a grid with `x` in the first dimension, `y` in the second, and `z` in
     the third.
@@ -1072,7 +1094,7 @@ def leggrid3d(x, y, z, c):
     ----------
     x, y, z : array_like, compatible objects
         The three dimensional series is evaluated at the points in the
-        Cartesian product of `x`, `y`, and `z`.  If `x`, `y`, or `z` is a
+        Cartesian product of `x`, `y`, and `z`.  If `x`,`y`, or `z` is a
         list or tuple, it is first converted to an ndarray, otherwise it is
         left unchanged and, if it isn't an ndarray, it is treated as a
         scalar.
@@ -1091,6 +1113,12 @@ def leggrid3d(x, y, z, c):
     See Also
     --------
     legval, legval2d, leggrid2d, legval3d
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     return pu._gridnd(legval, c, x, y, z)
 
@@ -1103,10 +1131,10 @@ def legvander(x, deg):
 
     .. math:: V[..., i] = L_i(x)
 
-    where ``0 <= i <= deg``. The leading indices of `V` index the elements of
+    where `0 <= i <= deg`. The leading indices of `V` index the elements of
     `x` and the last index is the degree of the Legendre polynomial.
 
-    If `c` is a 1-D array of coefficients of length ``n + 1`` and `V` is the
+    If `c` is a 1-D array of coefficients of length `n + 1` and `V` is the
     array ``V = legvander(x, n)``, then ``np.dot(V, c)`` and
     ``legval(x, c)`` are the same up to roundoff. This equivalence is
     useful both for least squares fitting and for the evaluation of a large
@@ -1130,11 +1158,11 @@ def legvander(x, deg):
         the converted `x`.
 
     """
-    ideg = pu._as_int(deg, "deg")
+    ideg = pu._deprecate_as_int(deg, "deg")
     if ideg < 0:
         raise ValueError("deg must be non-negative")
 
-    x = np.array(x, copy=None, ndmin=1) + 0.0
+    x = np.array(x, copy=False, ndmin=1) + 0.0
     dims = (ideg + 1,) + x.shape
     dtyp = x.dtype
     v = np.empty(dims, dtype=dtyp)
@@ -1152,12 +1180,12 @@ def legvander2d(x, y, deg):
     """Pseudo-Vandermonde matrix of given degrees.
 
     Returns the pseudo-Vandermonde matrix of degrees `deg` and sample
-    points ``(x, y)``. The pseudo-Vandermonde matrix is defined by
+    points `(x, y)`. The pseudo-Vandermonde matrix is defined by
 
     .. math:: V[..., (deg[1] + 1)*i + j] = L_i(x) * L_j(y),
 
-    where ``0 <= i <= deg[0]`` and ``0 <= j <= deg[1]``. The leading indices of
-    `V` index the points ``(x, y)`` and the last index encodes the degrees of
+    where `0 <= i <= deg[0]` and `0 <= j <= deg[1]`. The leading indices of
+    `V` index the points `(x, y)` and the last index encodes the degrees of
     the Legendre polynomials.
 
     If ``V = legvander2d(x, y, [xdeg, ydeg])``, then the columns of `V`
@@ -1191,6 +1219,12 @@ def legvander2d(x, y, deg):
     See Also
     --------
     legvander, legvander3d, legval2d, legval3d
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     return pu._vander_nd_flat((legvander, legvander), (x, y), deg)
 
@@ -1199,13 +1233,13 @@ def legvander3d(x, y, z, deg):
     """Pseudo-Vandermonde matrix of given degrees.
 
     Returns the pseudo-Vandermonde matrix of degrees `deg` and sample
-    points ``(x, y, z)``. If `l`, `m`, `n` are the given degrees in `x`, `y`, `z`,
+    points `(x, y, z)`. If `l, m, n` are the given degrees in `x, y, z`,
     then The pseudo-Vandermonde matrix is defined by
 
     .. math:: V[..., (m+1)(n+1)i + (n+1)j + k] = L_i(x)*L_j(y)*L_k(z),
 
-    where ``0 <= i <= l``, ``0 <= j <= m``, and ``0 <= j <= n``.  The leading
-    indices of `V` index the points ``(x, y, z)`` and the last index encodes
+    where `0 <= i <= l`, `0 <= j <= m`, and `0 <= j <= n`.  The leading
+    indices of `V` index the points `(x, y, z)` and the last index encodes
     the degrees of the Legendre polynomials.
 
     If ``V = legvander3d(x, y, z, [xdeg, ydeg, zdeg])``, then the columns
@@ -1239,6 +1273,12 @@ def legvander3d(x, y, z, deg):
     See Also
     --------
     legvander, legvander3d, legval2d, legval3d
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     return pu._vander_nd_flat((legvander, legvander, legvander), (x, y, z), deg)
 
@@ -1287,6 +1327,8 @@ def legfit(x, y, deg, rcond=None, full=False, w=None):
         same variance.  When using inverse-variance weighting, use
         ``w[i] = 1/sigma(y[i])``.  The default value is None.
 
+        .. versionadded:: 1.5.0
+
     Returns
     -------
     coef : ndarray, shape (M,) or (M, K)
@@ -1314,7 +1356,7 @@ def legfit(x, y, deg, rcond=None, full=False, w=None):
         warnings can be turned off by
 
         >>> import warnings
-        >>> warnings.simplefilter('ignore', np.exceptions.RankWarning)
+        >>> warnings.simplefilter('ignore', np.RankWarning)
 
     See Also
     --------
@@ -1347,8 +1389,8 @@ def legfit(x, y, deg, rcond=None, full=False, w=None):
     decomposition of `V`.
 
     If some of the singular values of `V` are so small that they are
-    neglected, then a `~exceptions.RankWarning` will be issued. This means that
-    the coefficient values may be poorly determined. Using a lower order fit
+    neglected, then a `RankWarning` will be issued. This means that the
+    coefficient values may be poorly determined. Using a lower order fit
     will usually get rid of the warning.  The `rcond` parameter can also be
     set to a value smaller than its default, but the resulting fit may be
     spurious and have large contributions from roundoff error.
@@ -1389,6 +1431,12 @@ def legcompanion(c):
     -------
     mat : ndarray
         Scaled companion matrix of dimensions (deg, deg).
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     # c is a trimmed copy
     [c] = pu.as_series([c])
@@ -1492,6 +1540,9 @@ def leggauss(deg):
 
     Notes
     -----
+
+    .. versionadded:: 1.7.0
+
     The results have only been tested up to degree 100, higher degrees may
     be problematic. The weights are determined by using the fact that
 
@@ -1502,7 +1553,7 @@ def leggauss(deg):
     the right value when integrating 1.
 
     """
-    ideg = pu._as_int(deg, "deg")
+    ideg = pu._deprecate_as_int(deg, "deg")
     if ideg <= 0:
         raise ValueError("deg must be a positive integer")
 
@@ -1551,6 +1602,12 @@ def legweight(x):
     -------
     w : ndarray
        The weight function at `x`.
+
+    Notes
+    -----
+
+    .. versionadded:: 1.7.0
+
     """
     w = x*0.0 + 1.0
     return w
@@ -1564,7 +1621,7 @@ class Legendre(ABCPolyBase):
 
     The Legendre class provides the standard Python numerical methods
     '+', '-', '*', '//', '%', 'divmod', '**', and '()' as well as the
-    attributes and methods listed below.
+    attributes and methods listed in the `ABCPolyBase` documentation.
 
     Parameters
     ----------
@@ -1574,9 +1631,11 @@ class Legendre(ABCPolyBase):
     domain : (2,) array_like, optional
         Domain to use. The interval ``[domain[0], domain[1]]`` is mapped
         to the interval ``[window[0], window[1]]`` by shifting and scaling.
-        The default value is [-1., 1.].
+        The default value is [-1, 1].
     window : (2,) array_like, optional
-        Window, see `domain` for its use. The default value is [-1., 1.].
+        Window, see `domain` for its use. The default value is [-1, 1].
+
+        .. versionadded:: 1.6.0
     symbol : str, optional
         Symbol used to represent the independent variable in string
         representations of the polynomial expression, e.g. for printing.

@@ -37,7 +37,12 @@ class IntelCCompiler(UnixCCompiler):
 
 class IntelItaniumCCompiler(IntelCCompiler):
     compiler_type = 'intele'
-    cc_exe = 'icc'
+
+    # On Itanium, the Intel Compiler used to be called ecc, let's search for
+    # it (now it's also icc, so ecc is last in the search).
+    for cc_exe in map(find_executable, ['icc', 'ecc']):
+        if cc_exe:
+            break
 
 
 class IntelEM64TCCompiler(UnixCCompiler):

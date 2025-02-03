@@ -627,7 +627,7 @@ def routsign2map(rout):
                                 ln = k
                                 break
                     lcb_map[ln] = un[1]
-    elif rout.get('externals'):
+    elif 'externals' in rout and rout['externals']:
         errmess('routsign2map: Confused: function %s has externals %s but no "use" statement.\n' % (
             ret['name'], repr(rout['externals'])))
     ret['callprotoargument'] = getcallprotoargument(rout, lcb_map) or ''
@@ -689,8 +689,6 @@ def modsign2map(m):
     else:
         ret['interface_usercode'] = ''
     ret['pymethoddef'] = getpymethoddef(m) or ''
-    if 'gil_used' in m:
-        ret['gil_used'] = m['gil_used']
     if 'coutput' in m:
         ret['coutput'] = m['coutput']
     if 'f2py_wrapper_output' in m:
@@ -798,7 +796,7 @@ void
     return ret
 
 
-def common_sign2map(a, var):  # obsolete
+def common_sign2map(a, var):  # obsolute
     ret = {'varname': a, 'ctype': getctype(var)}
     if isstringarray(var):
         ret['ctype'] = 'char'

@@ -1,207 +1,32 @@
 from collections.abc import Callable
 from typing import Any, TypeVar
+from numpy import ndarray, dtype, float64
 
 from numpy import (
-    amax,
-    amin,
-    bool_,
-    expand_dims,
-    clip,
-    indices,
-    squeeze,
-    angle,
-    ndarray,
-    dtype,
-    float64,
+    amax as amax,
+    amin as amin,
+    bool_ as bool_,
+    expand_dims as expand_dims,
+    clip as clip,
+    indices as indices,
+    ones_like as ones_like,
+    squeeze as squeeze,
+    zeros_like as zeros_like,
 )
 
-__all__ = [
-    "MAError",
-    "MaskError",
-    "MaskType",
-    "MaskedArray",
-    "abs",
-    "absolute",
-    "add",
-    "all",
-    "allclose",
-    "allequal",
-    "alltrue",
-    "amax",
-    "amin",
-    "angle",
-    "anom",
-    "anomalies",
-    "any",
-    "append",
-    "arange",
-    "arccos",
-    "arccosh",
-    "arcsin",
-    "arcsinh",
-    "arctan",
-    "arctan2",
-    "arctanh",
-    "argmax",
-    "argmin",
-    "argsort",
-    "around",
-    "array",
-    "asanyarray",
-    "asarray",
-    "bitwise_and",
-    "bitwise_or",
-    "bitwise_xor",
-    "bool_",
-    "ceil",
-    "choose",
-    "clip",
-    "common_fill_value",
-    "compress",
-    "compressed",
-    "concatenate",
-    "conjugate",
-    "convolve",
-    "copy",
-    "correlate",
-    "cos",
-    "cosh",
-    "count",
-    "cumprod",
-    "cumsum",
-    "default_fill_value",
-    "diag",
-    "diagonal",
-    "diff",
-    "divide",
-    "empty",
-    "empty_like",
-    "equal",
-    "exp",
-    "expand_dims",
-    "fabs",
-    "filled",
-    "fix_invalid",
-    "flatten_mask",
-    "flatten_structured_array",
-    "floor",
-    "floor_divide",
-    "fmod",
-    "frombuffer",
-    "fromflex",
-    "fromfunction",
-    "getdata",
-    "getmask",
-    "getmaskarray",
-    "greater",
-    "greater_equal",
-    "harden_mask",
-    "hypot",
-    "identity",
-    "ids",
-    "indices",
-    "inner",
-    "innerproduct",
-    "isMA",
-    "isMaskedArray",
-    "is_mask",
-    "is_masked",
-    "isarray",
-    "left_shift",
-    "less",
-    "less_equal",
-    "log",
-    "log10",
-    "log2",
-    "logical_and",
-    "logical_not",
-    "logical_or",
-    "logical_xor",
-    "make_mask",
-    "make_mask_descr",
-    "make_mask_none",
-    "mask_or",
-    "masked",
-    "masked_array",
-    "masked_equal",
-    "masked_greater",
-    "masked_greater_equal",
-    "masked_inside",
-    "masked_invalid",
-    "masked_less",
-    "masked_less_equal",
-    "masked_not_equal",
-    "masked_object",
-    "masked_outside",
-    "masked_print_option",
-    "masked_singleton",
-    "masked_values",
-    "masked_where",
-    "max",
-    "maximum",
-    "maximum_fill_value",
-    "mean",
-    "min",
-    "minimum",
-    "minimum_fill_value",
-    "mod",
-    "multiply",
-    "mvoid",
-    "ndim",
-    "negative",
-    "nomask",
-    "nonzero",
-    "not_equal",
-    "ones",
-    "ones_like",
-    "outer",
-    "outerproduct",
-    "power",
-    "prod",
-    "product",
-    "ptp",
-    "put",
-    "putmask",
-    "ravel",
-    "remainder",
-    "repeat",
-    "reshape",
-    "resize",
-    "right_shift",
-    "round",
-    "round_",
-    "set_fill_value",
-    "shape",
-    "sin",
-    "sinh",
-    "size",
-    "soften_mask",
-    "sometrue",
-    "sort",
-    "sqrt",
-    "squeeze",
-    "std",
-    "subtract",
-    "sum",
-    "swapaxes",
-    "take",
-    "tan",
-    "tanh",
-    "trace",
-    "transpose",
-    "true_divide",
-    "var",
-    "where",
-    "zeros",
-    "zeros_like",
-]
+from numpy.lib.function_base import (
+    angle as angle,
+)
 
-_ShapeType_co = TypeVar("_ShapeType_co", bound=tuple[int, ...], covariant=True)
+# TODO: Set the `bound` to something more suitable once we
+# have proper shape support
+_ShapeType = TypeVar("_ShapeType", bound=Any)
 _DType_co = TypeVar("_DType_co", bound=dtype[Any], covariant=True)
 
+__all__: list[str]
 
-MaskType = bool
-nomask: bool
+MaskType = bool_
+nomask: bool_
 
 class MaskedArrayFutureWarning(FutureWarning): ...
 class MAError(Exception): ...
@@ -343,11 +168,11 @@ class MaskedIterator:
     def __setitem__(self, index, value): ...
     def __next__(self): ...
 
-class MaskedArray(ndarray[_ShapeType_co, _DType_co]):
+class MaskedArray(ndarray[_ShapeType, _DType_co]):
     __array_priority__: Any
     def __new__(cls, data=..., mask=..., dtype=..., copy=..., subok=..., ndmin=..., fill_value=..., keep_mask=..., hard_mask=..., shrink=..., order=...): ...
     def __array_finalize__(self, obj): ...
-    def __array_wrap__(self, obj, context=..., return_scalar=...): ...
+    def __array_wrap__(self, obj, context=...): ...
     def view(self, dtype=..., type=..., fill_value=...): ...
     def __getitem__(self, indx): ...
     def __setitem__(self, indx, value): ...
@@ -448,10 +273,10 @@ class MaskedArray(ndarray[_ShapeType_co, _DType_co]):
     def var(self, axis=..., dtype=..., out=..., ddof=..., keepdims=...): ...
     def std(self, axis=..., dtype=..., out=..., ddof=..., keepdims=...): ...
     def round(self, decimals=..., out=...): ...
-    def argsort(self, axis=..., kind=..., order=..., endwith=..., fill_value=..., stable=...): ...
+    def argsort(self, axis=..., kind=..., order=..., endwith=..., fill_value=...): ...
     def argmin(self, axis=..., fill_value=..., out=..., *, keepdims=...): ...
     def argmax(self, axis=..., fill_value=..., out=..., *, keepdims=...): ...
-    def sort(self, axis=..., kind=..., order=..., endwith=..., fill_value=..., stable=...): ...
+    def sort(self, axis=..., kind=..., order=..., endwith=..., fill_value=...): ...
     def min(self, axis=..., out=..., fill_value=..., keepdims=...): ...
     # NOTE: deprecated
     # def tostring(self, fill_value=..., order=...): ...
@@ -468,8 +293,6 @@ class MaskedArray(ndarray[_ShapeType_co, _DType_co]):
     swapaxes: Any
     T: Any
     transpose: Any
-    @property  # type: ignore[misc]
-    def mT(self): ...
     def tolist(self, fill_value=...): ...
     def tobytes(self, fill_value=..., order=...): ...
     def tofile(self, fid, sep=..., format=...): ...
@@ -478,7 +301,7 @@ class MaskedArray(ndarray[_ShapeType_co, _DType_co]):
     def __reduce__(self): ...
     def __deepcopy__(self, memo=...): ...
 
-class mvoid(MaskedArray[_ShapeType_co, _DType_co]):
+class mvoid(MaskedArray[_ShapeType, _DType_co]):
     def __new__(
         self,
         data,
@@ -505,7 +328,8 @@ class MaskedConstant(MaskedArray[Any, dtype[float64]]):
     def __new__(cls): ...
     __class__: Any
     def __array_finalize__(self, obj): ...
-    def __array_wrap__(self, obj, context=..., return_scalar=...): ...
+    def __array_prepare__(self, obj, context=...): ...
+    def __array_wrap__(self, obj, context=...): ...
     def __format__(self, format_spec): ...
     def __reduce__(self): ...
     def __iop__(self, other): ...
@@ -593,8 +417,8 @@ maximum: _extrema_operation
 
 def take(a, indices, axis=..., out=..., mode=...): ...
 def power(a, b, third=...): ...
-def argsort(a, axis=..., kind=..., order=..., endwith=..., fill_value=..., stable=...): ...
-def sort(a, axis=..., kind=..., order=..., endwith=..., fill_value=..., stable=...): ...
+def argsort(a, axis=..., kind=..., order=..., endwith=..., fill_value=...): ...
+def sort(a, axis=..., kind=..., order=..., endwith=..., fill_value=...): ...
 def compressed(x): ...
 def concatenate(arrays, axis=...): ...
 def diag(v, k=...): ...
@@ -611,8 +435,7 @@ def size(obj, axis=...): ...
 def diff(a, /, n=..., axis=..., prepend=..., append=...): ...
 def where(condition, x=..., y=...): ...
 def choose(indices, choices, out=..., mode=...): ...
-def round_(a, decimals=..., out=...): ...
-round = round_
+def round(a, decimals=..., out=...): ...
 
 def inner(a, b): ...
 innerproduct = inner
@@ -641,9 +464,7 @@ frombuffer: _convert2ma
 fromfunction: _convert2ma
 identity: _convert2ma
 ones: _convert2ma
-ones_like: _convert2ma
 zeros: _convert2ma
-zeros_like: _convert2ma
 
 def append(a, b, axis=...): ...
 def dot(a, b, strict=..., out=...): ...

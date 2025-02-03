@@ -1,29 +1,31 @@
+import os
 import sys
 import ast
 import types
 import warnings
 import unittest
-from _typeshed import GenericPath, StrOrBytesPath, StrPath
-from collections.abc import Callable, Iterable, Sequence
-from contextlib import _GeneratorContextManager
+import contextlib
 from re import Pattern
+from collections.abc import Callable, Iterable, Sequence
 from typing import (
     Literal as L,
     Any,
     AnyStr,
     ClassVar,
     NoReturn,
-    TypeAlias,
     overload,
     type_check_only,
     TypeVar,
+    Union,
     Final,
     SupportsIndex,
-    ParamSpec
 )
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
-import numpy as np
-from numpy import number, object_, _ConvertibleToFloat
+from numpy import generic, dtype, number, object_, bool_, _FloatValue
 from numpy._typing import (
     NDArray,
     ArrayLike,
@@ -34,54 +36,9 @@ from numpy._typing import (
     _ArrayLikeDT64_co,
 )
 
-from unittest.case import SkipTest
-
-__all__ = [
-    "IS_EDITABLE",
-    "IS_MUSL",
-    "IS_PYPY",
-    "IS_PYSTON",
-    "IS_WASM",
-    "HAS_LAPACK64",
-    "HAS_REFCOUNT",
-    "NOGIL_BUILD",
-    "assert_",
-    "assert_array_almost_equal_nulp",
-    "assert_raises_regex",
-    "assert_array_max_ulp",
-    "assert_warns",
-    "assert_no_warnings",
-    "assert_allclose",
-    "assert_equal",
-    "assert_almost_equal",
-    "assert_approx_equal",
-    "assert_array_equal",
-    "assert_array_less",
-    "assert_string_equal",
-    "assert_array_almost_equal",
-    "assert_raises",
-    "build_err_msg",
-    "decorate_methods",
-    "jiffies",
-    "memusage",
-    "print_assert_equal",
-    "rundocs",
-    "runstring",
-    "verbose",
-    "measure",
-    "IgnoreException",
-    "clear_and_catch_warnings",
-    "SkipTest",
-    "KnownFailureException",
-    "temppath",
-    "tempdir",
-    "suppress_warnings",
-    "assert_array_compare",
-    "assert_no_gc_cycles",
-    "break_cycles",
-    "check_support_sve",
-    "run_threaded",
-]
+from unittest.case import (
+    SkipTest as SkipTest,
+)
 
 _P = ParamSpec("_P")
 _T = TypeVar("_T")
@@ -90,20 +47,22 @@ _FT = TypeVar("_FT", bound=Callable[..., Any])
 
 # Must return a bool or an ndarray/generic type
 # that is supported by `np.logical_and.reduce`
-_ComparisonFunc: TypeAlias = Callable[
+_ComparisonFunc = Callable[
     [NDArray[Any], NDArray[Any]],
-    (
-        bool
-        | np.bool
-        | number[Any]
-        | NDArray[np.bool | number[Any] | object_]
-    )
+    Union[
+        bool,
+        bool_,
+        number[Any],
+        NDArray[Union[bool_, number[Any], object_]],
+    ],
 ]
+
+__all__: list[str]
 
 class KnownFailureException(Exception): ...
 class IgnoreException(Exception): ...
 
-class clear_and_catch_warnings(warnings.catch_warnings[list[warnings.WarningMessage]]):
+class clear_and_catch_warnings(warnings.catch_warnings):
     class_modules: ClassVar[tuple[types.ModuleType, ...]]
     modules: set[types.ModuleType]
     @overload
@@ -171,14 +130,10 @@ class suppress_warnings:
     def __call__(self, func: _FT) -> _FT: ...
 
 verbose: int
-IS_EDITABLE: Final[bool]
-IS_MUSL: Final[bool]
 IS_PYPY: Final[bool]
 IS_PYSTON: Final[bool]
-IS_WASM: Final[bool]
 HAS_REFCOUNT: Final[bool]
 HAS_LAPACK64: Final[bool]
-NOGIL_BUILD: Final[bool]
 
 def assert_(val: object, msg: str | Callable[[], str] = ...) -> None: ...
 
@@ -187,13 +142,13 @@ def assert_(val: object, msg: str | Callable[[], str] = ...) -> None: ...
 if sys.platform == "win32" or sys.platform == "cygwin":
     def memusage(processName: str = ..., instance: int = ...) -> int: ...
 elif sys.platform == "linux":
-    def memusage(_proc_pid_stat: StrOrBytesPath = ...) -> None | int: ...
+    def memusage(_proc_pid_stat: str | bytes | os.PathLike[Any] = ...) -> None | int: ...
 else:
     def memusage() -> NoReturn: ...
 
 if sys.platform == "linux":
     def jiffies(
-        _proc_pid_stat: StrOrBytesPath = ...,
+        _proc_pid_stat: str | bytes | os.PathLike[Any] = ...,
         _load_time: list[float] = ...,
     ) -> int: ...
 else:
@@ -211,10 +166,8 @@ def build_err_msg(
 def assert_equal(
     actual: object,
     desired: object,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
-    *,
-    strict: bool = ...
 ) -> None: ...
 
 def print_assert_equal(
@@ -227,16 +180,16 @@ def assert_almost_equal(
     actual: _ArrayLikeNumber_co | _ArrayLikeObject_co,
     desired: _ArrayLikeNumber_co | _ArrayLikeObject_co,
     decimal: int = ...,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
 ) -> None: ...
 
 # Anything that can be coerced into `builtins.float`
 def assert_approx_equal(
-    actual: _ConvertibleToFloat,
-    desired: _ConvertibleToFloat,
+    actual: _FloatValue,
+    desired: _FloatValue,
     significant: int = ...,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
 ) -> None: ...
 
@@ -244,7 +197,7 @@ def assert_array_compare(
     comparison: _ComparisonFunc,
     x: ArrayLike,
     y: ArrayLike,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
     header: str = ...,
     precision: SupportsIndex = ...,
@@ -257,8 +210,7 @@ def assert_array_compare(
 def assert_array_equal(
     x: ArrayLike,
     y: ArrayLike,
-    /,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
     *,
     strict: bool = ...
@@ -267,9 +219,8 @@ def assert_array_equal(
 def assert_array_almost_equal(
     x: _ArrayLikeNumber_co | _ArrayLikeObject_co,
     y: _ArrayLikeNumber_co | _ArrayLikeObject_co,
-    /,
     decimal: float = ...,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
 ) -> None: ...
 
@@ -277,28 +228,22 @@ def assert_array_almost_equal(
 def assert_array_less(
     x: _ArrayLikeNumber_co | _ArrayLikeObject_co,
     y: _ArrayLikeNumber_co | _ArrayLikeObject_co,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
-    *,
-    strict: bool = ...
 ) -> None: ...
 @overload
 def assert_array_less(
     x: _ArrayLikeTD64_co,
     y: _ArrayLikeTD64_co,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
-    *,
-    strict: bool = ...
 ) -> None: ...
 @overload
 def assert_array_less(
     x: _ArrayLikeDT64_co,
     y: _ArrayLikeDT64_co,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
-    *,
-    strict: bool = ...
 ) -> None: ...
 
 def runstring(
@@ -309,11 +254,9 @@ def runstring(
 def assert_string_equal(actual: str, desired: str) -> None: ...
 
 def rundocs(
-    filename: StrPath | None = ...,
+    filename: None | str | os.PathLike[str] = ...,
     raise_on_error: bool = ...,
 ) -> None: ...
-
-def check_support_sve(__cache: list[_T]) -> _T: ...
 
 def raises(*args: type[BaseException]) -> Callable[[_FT], _FT]: ...
 
@@ -368,10 +311,8 @@ def assert_allclose(
     rtol: float = ...,
     atol: float = ...,
     equal_nan: bool = ...,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
-    *,
-    strict: bool = ...
 ) -> None: ...
 @overload
 def assert_allclose(
@@ -380,10 +321,8 @@ def assert_allclose(
     rtol: float = ...,
     atol: float = ...,
     equal_nan: bool = ...,
-    err_msg: object = ...,
+    err_msg: str = ...,
     verbose: bool = ...,
-    *,
-    strict: bool = ...
 ) -> None: ...
 
 def assert_array_almost_equal_nulp(
@@ -400,7 +339,9 @@ def assert_array_max_ulp(
 ) -> NDArray[Any]: ...
 
 @overload
-def assert_warns(warning_class: type[Warning]) -> _GeneratorContextManager[None]: ...
+def assert_warns(
+    warning_class: type[Warning],
+) -> contextlib._GeneratorContextManager[None]: ...
 @overload
 def assert_warns(
     warning_class: type[Warning],
@@ -411,7 +352,7 @@ def assert_warns(
 ) -> _T: ...
 
 @overload
-def assert_no_warnings() -> _GeneratorContextManager[None]: ...
+def assert_no_warnings() -> contextlib._GeneratorContextManager[None]: ...
 @overload
 def assert_no_warnings(
     func: Callable[_P, _T],
@@ -425,13 +366,13 @@ def tempdir(
     suffix: None = ...,
     prefix: None = ...,
     dir: None = ...,
-) -> _GeneratorContextManager[str]: ...
+) -> contextlib._GeneratorContextManager[str]: ...
 @overload
 def tempdir(
-    suffix: AnyStr | None = ...,
-    prefix: AnyStr | None = ...,
-    dir: GenericPath[AnyStr] | None = ...,
-) -> _GeneratorContextManager[AnyStr]: ...
+    suffix: None | AnyStr = ...,
+    prefix: None | AnyStr = ...,
+    dir: None | AnyStr | os.PathLike[AnyStr] = ...,
+) -> contextlib._GeneratorContextManager[AnyStr]: ...
 
 @overload
 def temppath(
@@ -439,17 +380,17 @@ def temppath(
     prefix: None = ...,
     dir: None = ...,
     text: bool = ...,
-) -> _GeneratorContextManager[str]: ...
+) -> contextlib._GeneratorContextManager[str]: ...
 @overload
 def temppath(
-    suffix: AnyStr | None = ...,
-    prefix: AnyStr | None = ...,
-    dir: GenericPath[AnyStr] | None = ...,
+    suffix: None | AnyStr = ...,
+    prefix: None | AnyStr = ...,
+    dir: None | AnyStr | os.PathLike[AnyStr] = ...,
     text: bool = ...,
-) -> _GeneratorContextManager[AnyStr]: ...
+) -> contextlib._GeneratorContextManager[AnyStr]: ...
 
 @overload
-def assert_no_gc_cycles() -> _GeneratorContextManager[None]: ...
+def assert_no_gc_cycles() -> contextlib._GeneratorContextManager[None]: ...
 @overload
 def assert_no_gc_cycles(
     func: Callable[_P, Any],
@@ -459,5 +400,3 @@ def assert_no_gc_cycles(
 ) -> None: ...
 
 def break_cycles() -> None: ...
-
-def run_threaded(func: Callable[[], None], iters: int, pass_count: bool = False) -> None: ...

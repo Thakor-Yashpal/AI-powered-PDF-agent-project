@@ -24,13 +24,7 @@ from numpy.distutils import log
 
 import distutils.cygwinccompiler
 from distutils.unixccompiler import UnixCCompiler
-
-try:
-    from distutils.msvccompiler import get_build_version as get_build_msvc_version
-except ImportError:
-    def get_build_msvc_version():
-        return None
-
+from distutils.msvccompiler import get_build_version as get_build_msvc_version
 from distutils.errors import UnknownFileError
 from numpy.distutils.misc_util import (msvc_runtime_library,
                                        msvc_runtime_version,
@@ -190,7 +184,7 @@ def find_python_dll():
     # - find it in the virtualenv (sys.prefix)
     # - find it in python main dir (sys.base_prefix, if in a virtualenv)
     # - in system32,
-    # - otherwise (Sxs), I don't know how to get it.
+    # - ortherwise (Sxs), I don't know how to get it.
     stems = [sys.prefix]
     if sys.base_prefix != sys.prefix:
         stems.append(sys.base_prefix)

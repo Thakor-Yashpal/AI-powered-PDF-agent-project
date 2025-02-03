@@ -1,6 +1,6 @@
 from math import nan, inf
 import pytest
-from numpy._core import array, arange, printoptions
+from numpy.core import array, arange, printoptions
 import numpy.polynomial as poly
 from numpy.testing import assert_equal, assert_
 
@@ -23,8 +23,7 @@ class TestStrUnicodeSuperSubscripts:
                       "11.0·x¹¹")),
     ))
     def test_polynomial_str(self, inp, tgt):
-        p = poly.Polynomial(inp)
-        res = str(p)
+        res = str(poly.Polynomial(inp))
         assert_equal(res, tgt)
 
     @pytest.mark.parametrize(('inp', 'tgt'), (
@@ -83,14 +82,6 @@ class TestStrUnicodeSuperSubscripts:
         res = str(poly.Laguerre(inp))
         assert_equal(res, tgt)
 
-    def test_polynomial_str_domains(self):
-        res = str(poly.Polynomial([0, 1]))
-        tgt = '0.0 + 1.0·x'
-        assert_equal(res, tgt)
-
-        res = str(poly.Polynomial([0, 1], domain=[1, 2]))
-        tgt = '0.0 + 1.0·(-3.0 + 2.0x)'
-        assert_equal(res, tgt)
 
 class TestStrAscii:
 
@@ -169,14 +160,6 @@ class TestStrAscii:
         res = str(poly.Laguerre(inp))
         assert_equal(res, tgt)
 
-    def test_polynomial_str_domains(self):
-        res = str(poly.Polynomial([0, 1]))
-        tgt = '0.0 + 1.0 x'
-        assert_equal(res, tgt)
-
-        res = str(poly.Polynomial([0, 1], domain=[1, 2]))
-        tgt = '0.0 + 1.0 (-3.0 + 2.0x)'
-        assert_equal(res, tgt)
 
 class TestLinebreaking:
 
@@ -341,18 +324,18 @@ def test_symbol(poly, tgt):
 
 
 class TestRepr:
-    def test_polynomial_repr(self):
+    def test_polynomial_str(self):
         res = repr(poly.Polynomial([0, 1]))
         tgt = (
-            "Polynomial([0., 1.], domain=[-1.,  1.], window=[-1.,  1.], "
+            "Polynomial([0., 1.], domain=[-1,  1], window=[-1,  1], "
             "symbol='x')"
         )
         assert_equal(res, tgt)
 
-    def test_chebyshev_repr(self):
+    def test_chebyshev_str(self):
         res = repr(poly.Chebyshev([0, 1]))
         tgt = (
-            "Chebyshev([0., 1.], domain=[-1.,  1.], window=[-1.,  1.], "
+            "Chebyshev([0., 1.], domain=[-1,  1], window=[-1,  1], "
             "symbol='x')"
         )
         assert_equal(res, tgt)
@@ -360,7 +343,7 @@ class TestRepr:
     def test_legendre_repr(self):
         res = repr(poly.Legendre([0, 1]))
         tgt = (
-            "Legendre([0., 1.], domain=[-1.,  1.], window=[-1.,  1.], "
+            "Legendre([0., 1.], domain=[-1,  1], window=[-1,  1], "
             "symbol='x')"
         )
         assert_equal(res, tgt)
@@ -368,7 +351,7 @@ class TestRepr:
     def test_hermite_repr(self):
         res = repr(poly.Hermite([0, 1]))
         tgt = (
-            "Hermite([0., 1.], domain=[-1.,  1.], window=[-1.,  1.], "
+            "Hermite([0., 1.], domain=[-1,  1], window=[-1,  1], "
             "symbol='x')"
         )
         assert_equal(res, tgt)
@@ -376,7 +359,7 @@ class TestRepr:
     def test_hermiteE_repr(self):
         res = repr(poly.HermiteE([0, 1]))
         tgt = (
-            "HermiteE([0., 1.], domain=[-1.,  1.], window=[-1.,  1.], "
+            "HermiteE([0., 1.], domain=[-1,  1], window=[-1,  1], "
             "symbol='x')"
         )
         assert_equal(res, tgt)
@@ -384,7 +367,7 @@ class TestRepr:
     def test_laguerre_repr(self):
         res = repr(poly.Laguerre([0, 1]))
         tgt = (
-            "Laguerre([0., 1.], domain=[0., 1.], window=[0., 1.], "
+            "Laguerre([0., 1.], domain=[0, 1], window=[0, 1], "
             "symbol='x')"
         )
         assert_equal(res, tgt)
@@ -393,8 +376,7 @@ class TestRepr:
 class TestLatexRepr:
     """Test the latex repr used by Jupyter"""
 
-    @staticmethod
-    def as_latex(obj):
+    def as_latex(self, obj):
         # right now we ignore the formatting of scalars in our tests, since
         # it makes them too verbose. Ideally, the formatting of scalars will
         # be fixed such that tests below continue to pass
@@ -475,10 +457,6 @@ class TestLatexRepr:
             ),
         )
 
-    def test_numeric_object_coefficients(self):
-        coefs = array([Fraction(1, 2), Fraction(1)])
-        p = poly.Polynomial(coefs)
-        assert_equal(self.as_latex(p), '$x \\mapsto 1/2 + 1\\,x$')
 
 SWITCH_TO_EXP = (
     '1.0 + (1.0e-01) x + (1.0e-02) x**2',
@@ -496,7 +474,7 @@ SWITCH_TO_EXP = (
 class TestPrintOptions:
     """
     Test the output is properly configured via printoptions.
-    The exponential notation is enabled automatically when the values
+    The exponential notation is enabled automatically when the values 
     are too small or too large.
     """
 
@@ -519,7 +497,7 @@ class TestPrintOptions:
             r'$x \mapsto \text{0.5} + \text{0.14285714}\,x + '
             r'\text{14285714.28571429}\,x^{2} + '
             r'\text{(1.42857143e+08)}\,x^{3}$')
-
+        
         with printoptions(precision=3):
             assert_equal(p._repr_latex_(),
                 r'$x \mapsto \text{0.5} + \text{0.143}\,x + '
@@ -528,20 +506,20 @@ class TestPrintOptions:
     def test_fixed(self):
         p = poly.Polynomial([1/2])
         assert_equal(str(p), '0.5')
-
+        
         with printoptions(floatmode='fixed'):
             assert_equal(str(p), '0.50000000')
-
+        
         with printoptions(floatmode='fixed', precision=4):
             assert_equal(str(p), '0.5000')
 
     def test_switch_to_exp(self):
         for i, s in enumerate(SWITCH_TO_EXP):
             with printoptions(precision=i):
-                p = poly.Polynomial([1.23456789*10**-i
+                p = poly.Polynomial([1.23456789*10**-i 
                                      for i in range(i//2+3)])
-                assert str(p).replace('\n', ' ') == s
-
+                assert str(p).replace('\n', ' ') == s 
+    
     def test_non_finite(self):
         p = poly.Polynomial([nan, inf])
         assert str(p) == 'nan + inf x'
