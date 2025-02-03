@@ -18,4 +18,5 @@ def create_retriever(docsearch, llm):
     """Create a retriever with contextual compression."""
     compressor = LLMChainExtractor.from_llm(llm)
     retriever = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=docsearch.as_retriever())
-    return retriever
+    return retriever 
+
