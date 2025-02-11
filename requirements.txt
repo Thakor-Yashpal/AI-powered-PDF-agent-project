@@ -1,7 +1,4 @@
 langchain
-llama-index  # Optional, if using LlamaIndex
 pymupdf
 tika
 sentence-transformers
-pinecone-client # Or other vector database client
-openai          # Or other LLM provider library
