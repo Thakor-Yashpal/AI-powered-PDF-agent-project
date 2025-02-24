@@ -20,3 +20,7 @@ def create_retriever(docsearch, llm):
     retriever = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=docsearch.as_retriever())
     return retriever 
 
+
+
+
+
